@@ -2,3 +2,5 @@ _scratch
 tpl
 vendor/
 _dist/
+.idea/
+helm*

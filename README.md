@@ -1,41 +1,47 @@
-# Helm Template Plugin
+# Helm-Template Standalone
 
-This is a Helm plugin to help chart developers debug their charts. It works like
-`helm install --dry-run --debug`, except that it runs locally, has more output
+This is a standalone Helm template utility to help chart developers debug their charts.
+
+Based on Helm template plugin by [technosophos](https://github.com/technosophos/helm-template) and [Helm](https://github.com/kubernetes/helm) source.
+
+It works like `helm install --dry-run --debug`, except that it runs locally, has more output
 options, and is quite a bit faster.
-
-<a href="https://asciinema.org/a/8kuehzpx5xyl8cm3cairica8z" target="_blank"><img src="https://asciinema.org/a/8kuehzpx5xyl8cm3cairica8z.png" width="589"/></a>
 
 ## Usage
 
 Render chart templates locally and display the output.
 
-This does not require Tiller. However, any values that would normally be
+This does not require Helm or Tiller. However, any values that would normally be
 looked up or retrieved in-cluster will be faked locally. Additionally, none
 of the server-side testing of chart validity (e.g. whether an API is supported)
 is done.
 
 ```
-$ helm template [flags] CHART
+$ helm-template [flags] CHART
 ```
 
 ### Flags:
 
 ```
-      --notes               show the computed NOTES.txt file as well.
-      --set string          set values on the command line. See 'helm install -h'
-  -f, --values valueFiles   specify one or more YAML files of values (default [])
-  -v, --verbose             show the computed YAML values as well.
+  -x, --execute stringArray   only execute the given templates.
+  -h, --help                  help for helm-template
+  -n, --namespace string      namespace (default "NAMESPACE")
+      --notes                 show the computed NOTES.txt file as well.
+  -o, --output-dir string     store the output files in this directory.
+  -r, --release string        release name (default "RELEASE-NAME")
+      --set stringArray       set values on the command line. See 'helm install -h'
+  -f, --values valueFiles     specify one or more YAML files of values (default [])
+  -v, --verbose               show the computed YAML values as well.
 ```
 
 
 ## Install
 
 ```
-$ helm plugin install https://github.com/technosophos/helm-template
+$ go get -u github.com/n0madic/helm-template
 ```
 
-The above will fetch the latest binary release of `helm template` and install it.
+The above will fetch the latest release of `helm-template` and install it.
 
 ### Developer (From Source) Install
 
@@ -48,13 +54,12 @@ First, set up your environment:
 - If you don't have [Glide](http://glide.sh) installed, this will install it into
   `$GOPATH/bin` for you.
 
-Clone this repo into your `$GOPATH`. You can use `go get -d github.com/technosophos/helm-template`
+Clone this repo into your `$GOPATH`. You can use `go get -d github.com/n0madic/helm-template`
 for that.
 
 ```
-$ cd $GOPATH/src/github.com/technosophos/helm-template
+$ cd $GOPATH/src/github.com/n0madic/helm-template
 $ make bootstrap build
-$ SKIP_BIN_INSTALL=1 helm plugin install $GOPATH/src/github.com/technosophos/helm-template
 ```
 
 That last command will skip fetching the binary install and use the one you

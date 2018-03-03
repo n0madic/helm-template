@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -23,25 +24,26 @@ import (
 const globalUsage = `
 Render chart templates locally and display the output.
 
-This does not require Tiller. However, any values that would normally be
+This does not require Helm or Tiller. However, any values that would normally be
 looked up or retrieved in-cluster will be faked locally. Additionally, none
 of the server-side testing of chart validity (e.g. whether an API is supported)
 is done.
 
 To render just one template in a chart, use '-x':
 
-	$ helm template mychart -x mychart/templates/deployment.yaml
+	$ helm-template mychart -x mychart/templates/deployment.yaml
 `
 
 var (
-	setVals     []string
-	valsFiles   valueFiles
-	flagVerbose bool
-	showNotes   bool
-	releaseName string
-	namespace   string
-	renderFiles []string
-	outputDir   string
+	setVals         []string
+	valsFiles       valueFiles
+	flagVerbose     bool
+	showNotes       bool
+	releaseName     string
+	namespace       string
+	renderFiles     []string
+	outputDir       string
+	whitespaceRegex = regexp.MustCompile(`^\s*$`)
 )
 
 const defaultDirectoryPermission = 0755
@@ -50,7 +52,7 @@ var version = "DEV"
 
 func main() {
 	cmd := &cobra.Command{
-		Use:   "template [flags] CHART",
+		Use:   "helm-template [flags] CHART",
 		Short: fmt.Sprintf("locally render templates (helm-template %s)", version),
 		RunE:  run,
 	}
@@ -79,7 +81,7 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	vv, err := vals()
+	vv, err := vals(valsFiles, setVals)
 	if err != nil {
 		return err
 	}
@@ -160,13 +162,23 @@ func run(cmd *cobra.Command, args []string) error {
 }
 
 // liberally borrows from Helm
-func vals() ([]byte, error) {
+// vals merges values from files specified via -f/--values and
+// directly via --set, marshaling them to YAML
+func vals(valueFiles valueFiles, values []string) ([]byte, error) {
 	base := map[string]interface{}{}
 
 	// User specified a values files via -f/--values
-	for _, filePath := range valsFiles {
+	for _, filePath := range valueFiles {
 		currentMap := map[string]interface{}{}
-		bytes, err := ioutil.ReadFile(filePath)
+
+		var bytes []byte
+		var err error
+		if strings.TrimSpace(filePath) == "-" {
+			bytes, err = ioutil.ReadAll(os.Stdin)
+		} else {
+			bytes, err = ioutil.ReadFile(filePath)
+		}
+
 		if err != nil {
 			return []byte{}, err
 		}
@@ -179,7 +191,7 @@ func vals() ([]byte, error) {
 	}
 
 	// User specified a value via --set
-	for _, value := range setVals {
+	for _, value := range values {
 		if err := strvals.ParseInto(value, base); err != nil {
 			return []byte{}, fmt.Errorf("failed parsing --set data: %s", err)
 		}
@@ -189,7 +201,7 @@ func vals() ([]byte, error) {
 }
 
 // Copied from Helm.
-
+// Merges source and destination map, preferring values from the source map
 func mergeValues(dest map[string]interface{}, src map[string]interface{}) map[string]interface{} {
 	for k, v := range src {
 		// If the key doesn't exist already, then just set the key to that value
@@ -240,48 +252,52 @@ func (v *valueFiles) Set(value string) error {
 
 func printOutput(name string, data string) {
 	if outputDir != "" {
-		printToFile(name, data)
-		return
+		// blank template after execution
+		if ! whitespaceRegex.MatchString(data) {
+			err := writeToFile(outputDir, name, data)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+	} else {
+		fmt.Printf("---\n# Source: %s\n", name)
+		fmt.Println(data)
 	}
-
-	printToStdout(name, data)
 }
 
-func printToStdout(name string, data string) {
-	fmt.Printf("---\n# Source: %s\n", name)
-	fmt.Printf(data)
-}
+// write the <data> to <output-dir>/<name>
+func writeToFile(outputDir string, name string, data string) error {
+	outfileName := path.Join(outputDir, name)
 
-func printToFile(name string, data string) {
-	outfileName := strings.Join([]string{outputDir, name}, string(filepath.Separator))
-	ensureDirectoryForFile(outfileName)
+	err := ensureDirectoryForFile(outfileName)
+	if err != nil {
+		return err
+	}
 
 	f, err := os.Create(outfileName)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	defer f.Close()
 
-	_, err = f.WriteString(fmt.Sprintf("---\n# Source: %s\n%s", name, data))
+	_, err = f.WriteString(fmt.Sprintf("##---\n# Source: %s\n%s", name, data))
 
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	fmt.Printf("wrote %s\n", outfileName)
-	return
+	return nil
 }
 
-func ensureDirectoryForFile(file string) {
+// check if the directory exists to create file. creates if don't exists
+func ensureDirectoryForFile(file string) error {
 	baseDir := path.Dir(file)
 	_, err := os.Stat(baseDir)
-	if !os.IsNotExist(err) {
-		return
+	if err != nil && !os.IsNotExist(err) {
+		return err
 	}
 
-	err = os.MkdirAll(baseDir, defaultDirectoryPermission)
-	if err != nil {
-		panic(err)
-	}
+	return os.MkdirAll(baseDir, defaultDirectoryPermission)
 }
