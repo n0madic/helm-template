@@ -3,7 +3,6 @@ go:
 - 1.x
 script:
 - make bootstrap
-- make build
 - GOOS=linux   GOARCH=386   go build -o helm-template-$TRAVIS_TAG-linux-i386
 - GOOS=linux   GOARCH=amd64 go build -o helm-template-$TRAVIS_TAG-linux-amd64
 - GOOS=windows GOARCH=386   go build -o helm-template-$TRAVIS_TAG-windows-i386.exe
