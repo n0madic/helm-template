@@ -1,12 +1,10 @@
-hash: d55c934a045cf5d5858dc6fc8d9c60d74c25f97dc083fa4a24f232204908f138
-updated: 2018-03-03T17:50:56.074471853+02:00
+hash: 359d5bd894627eb2781f90b4b9bf8a3252e74e3ac3369b81e07fa9e15d40cc5c
+updated: 2018-03-05T17:45:05.907194297+02:00
 imports:
 - name: github.com/aokoli/goutils
   version: 9c37978a95bd5c709a15883b6242714ea6709e64
 - name: github.com/BurntSushi/toml
   version: b26d9c308763d68093482582cea63d69be07a0f0
-- name: github.com/facebookgo/symwalk
-  version: 42004b9f322246749dd73ad71008b1f3160c0052
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/gobwas/glob
@@ -20,7 +18,7 @@ imports:
   - util/runes
   - util/strings
 - name: github.com/golang/protobuf
-  version: 2bba0603135d7d7f5cb73b2125beeda19c09f4ef
+  version: 4bd1920723d7b7c925de087aa32e2187708897f7
   subpackages:
   - proto
   - ptypes/any
@@ -32,7 +30,7 @@ imports:
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/Masterminds/semver
-  version: 3f0ab6d4ab4bed1c61caf056b63a6e62190c7801
+  version: 517734cc7d6470c0d07130e40fd40bdeb9bcd3fd
 - name: github.com/Masterminds/sprig
   version: b217b9c388de2cacde4354c536e520c52c055563
 - name: github.com/satori/go.uuid
@@ -53,7 +51,7 @@ imports:
   subpackages:
   - pkg/version
 - name: k8s.io/helm
-  version: 7cf31e8d9a026287041bae077b09165be247ae66
+  version: 6af75a8fd72e2aa18a2b278cfe5c7a1c5feca7f2
   subpackages:
   - pkg/chartutil
   - pkg/engine
@@ -61,5 +59,7 @@ imports:
   - pkg/proto/hapi/chart
   - pkg/proto/hapi/version
   - pkg/strvals
+  - pkg/sympath
   - pkg/timeconv
+  - pkg/version
 testImports: []

@@ -1,5 +1,5 @@
 HAS_GLIDE := $(shell command -v glide;)
-VERSION := "0.1.0"
+VERSION := $(shell grep -zoP 'k8s.io\/helm\n\s+version:\s\K\S+' glide.yaml)
 LDFLAGS := "-X main.version=${VERSION}"
 
 .PHONY: build
