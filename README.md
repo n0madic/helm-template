@@ -36,6 +36,9 @@ $ helm-template [flags] CHART
 
 
 ## Install
+[![Build Status](https://travis-ci.org/n0madic/helm-template.svg?branch=master)](https://travis-ci.org/n0madic/helm-template)
+
+[Get binary files](https://github.com/n0madic/helm-template/releases) or install from source:
 
 ```
 $ go get -u github.com/n0madic/helm-template
