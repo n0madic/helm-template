@@ -4,7 +4,7 @@ LDFLAGS := "-X main.version=${VERSION}"
 
 .PHONY: build
 build:
-	go build -ldflags $(LDFLAGS)
+	CGO_ENABLED=0 go build -ldflags $(LDFLAGS)
 
 .PHONY: bootstrap
 bootstrap:

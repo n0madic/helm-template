@@ -1,6 +1,8 @@
 language: go
 go:
 - 1.x
+env:
+  - CGO_ENABLED=0
 script:
 - make bootstrap
 - GOOS=linux   GOARCH=386   go build -o helm-template-$TRAVIS_TAG-linux-i386
