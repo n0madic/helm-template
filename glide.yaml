@@ -2,7 +2,7 @@ package: github.com/n0madic/helm-template
 import:
 - package: github.com/spf13/cobra
 - package: k8s.io/helm
-  version: 2.9.1
+  version: 2.11.0
   subpackages:
   - pkg/chartutil
   - pkg/engine
