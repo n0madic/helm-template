@@ -23,15 +23,16 @@ $ helm-template [flags] CHART
 ### Flags:
 
 ```
-  -x, --execute stringArray   only execute the given templates.
-  -h, --help                  help for helm-template
-  -n, --namespace string      namespace (default "NAMESPACE")
-      --notes                 show the computed NOTES.txt file as well.
-  -o, --output-dir string     store the output files in this directory.
-  -r, --release string        release name (default "RELEASE-NAME")
-      --set stringArray       set values on the command line. See 'helm install -h'
-  -f, --values valueFiles     specify one or more YAML files of values (default [])
-  -v, --verbose               show the computed YAML values as well.
+  -x, --execute stringArray      only execute the given templates
+  -h, --help                     help for helm-template
+  -n, --namespace string         namespace (default "NAMESPACE")
+      --notes                    show the computed NOTES.txt file as well
+  -o, --output-dir string        store the output files in this directory
+  -r, --release string           release name (default "RELEASE-NAME")
+      --set stringArray          set values on the command line
+      --set-string stringArray   set STRING values on the command line
+  -f, --values valueFiles        specify one or more YAML files of values (default [])
+  -v, --verbose                  show the computed YAML values as well
 ```
 
 

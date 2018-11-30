@@ -36,6 +36,7 @@ To render just one template in a chart, use '-x':
 
 var (
 	setVals         []string
+	setStringVals   []string
 	valsFiles       valueFiles
 	flagVerbose     bool
 	showNotes       bool
@@ -58,14 +59,15 @@ func main() {
 	}
 
 	f := cmd.Flags()
-	f.StringArrayVar(&setVals, "set", []string{}, "set values on the command line. See 'helm install -h'")
+	f.StringArrayVar(&setVals, "set", []string{}, "set values on the command line")
+	f.StringArrayVar(&setStringVals, "set-string", []string{}, "set STRING values on the command line")
 	f.VarP(&valsFiles, "values", "f", "specify one or more YAML files of values")
-	f.BoolVarP(&flagVerbose, "verbose", "v", false, "show the computed YAML values as well.")
-	f.BoolVar(&showNotes, "notes", false, "show the computed NOTES.txt file as well.")
+	f.BoolVarP(&flagVerbose, "verbose", "v", false, "show the computed YAML values as well")
+	f.BoolVar(&showNotes, "notes", false, "show the computed NOTES.txt file as well")
 	f.StringVarP(&releaseName, "release", "r", "RELEASE-NAME", "release name")
 	f.StringVarP(&namespace, "namespace", "n", "NAMESPACE", "namespace")
-	f.StringArrayVarP(&renderFiles, "execute", "x", []string{}, "only execute the given templates.")
-	f.StringVarP(&outputDir, "output-dir", "o", "", "store the output files in this directory.")
+	f.StringArrayVarP(&renderFiles, "execute", "x", []string{}, "only execute the given templates")
+	f.StringVarP(&outputDir, "output-dir", "o", "", "store the output files in this directory")
 
 	if err := cmd.Execute(); err != nil {
 		os.Exit(1)
@@ -81,7 +83,7 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	vv, err := vals(valsFiles, setVals)
+	vv, err := vals(valsFiles, setVals, setStringVals)
 	if err != nil {
 		return err
 	}
@@ -164,7 +166,7 @@ func run(cmd *cobra.Command, args []string) error {
 // liberally borrows from Helm
 // vals merges values from files specified via -f/--values and
 // directly via --set, marshaling them to YAML
-func vals(valueFiles valueFiles, values []string) ([]byte, error) {
+func vals(valueFiles valueFiles, values []string, stringValues []string) ([]byte, error) {
 	base := map[string]interface{}{}
 
 	// User specified a values files via -f/--values
@@ -194,6 +196,13 @@ func vals(valueFiles valueFiles, values []string) ([]byte, error) {
 	for _, value := range values {
 		if err := strvals.ParseInto(value, base); err != nil {
 			return []byte{}, fmt.Errorf("failed parsing --set data: %s", err)
+		}
+	}
+
+	// User specified a value via --set-string
+	for _, value := range stringValues {
+		if err := strvals.ParseIntoString(value, base); err != nil {
+			return []byte{}, fmt.Errorf("failed parsing --set-string data: %s", err)
 		}
 	}
 
@@ -253,7 +262,7 @@ func (v *valueFiles) Set(value string) error {
 func printOutput(name string, data string) {
 	if outputDir != "" {
 		// blank template after execution
-		if ! whitespaceRegex.MatchString(data) {
+		if !whitespaceRegex.MatchString(data) {
 			err := writeToFile(outputDir, name, data)
 			if err != nil {
 				fmt.Println(err)
